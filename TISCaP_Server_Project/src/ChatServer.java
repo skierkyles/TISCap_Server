@@ -25,7 +25,7 @@ public class  ChatServer
 	private static final Executor exec = Executors.newCachedThreadPool();
 	
 	public static void main(String[] args) throws IOException {
-		Set<Connection> threads = new HashSet<Connection>();
+		List<Connection> threads = Collections.synchronizedList(new ArrayList<Connection>());
 		List<String> users = Collections.synchronizedList(new ArrayList<String>());
 		
 		ServerSocket sock = null;

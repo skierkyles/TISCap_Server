@@ -20,7 +20,7 @@ import java.util.Set;
 
 public class Connection implements Runnable {
 	public Socket client;
-	public Set<Connection> clients;
+	public List<Connection> clients;
 	public List<String> users;
 	public OutputStream toClient;
 	public InputStream fromClient;
@@ -30,7 +30,8 @@ public class Connection implements Runnable {
 	public String uname = "";
 	public boolean active = false;
 
-	public Connection(Socket client, Set<Connection> clients, List<String> users) {
+	public Connection(Socket client, List<Connection> clients,
+			List<String> users) {
 		this.clients = clients;
 		this.client = client;
 		this.users = users;
@@ -62,7 +63,7 @@ public class Connection implements Runnable {
 						host));
 				String input = bufReader.readLine();
 				ClientCommand cc = ClientCommand.parse(input);
-				
+
 				System.out.println("Requested Command: " + cc.command);
 
 				// Log the user in.
@@ -76,7 +77,7 @@ public class Connection implements Runnable {
 						uname = cc.arg;
 						users.add(uname);
 						active = true;
-						
+
 						writeWelcome();
 					}
 				}
@@ -85,9 +86,9 @@ public class Connection implements Runnable {
 					System.out.println("public msg: " + cc.data);
 					publicToAllClients(cc.data, uname);
 				}
-				
-				if (cc.command.equals("private")) {
 
+				if (cc.command.equals("private")) {
+					privateToUser(cc.data, cc.arg);
 				}
 
 				if (cc.command.equals("users")) {
@@ -113,35 +114,57 @@ public class Connection implements Runnable {
 	public void writeWelcome() {
 		writeToClient("welcome\r\n");
 	}
-	
+
 	public void writeUserList(List<String> u) {
 		String out = "ActiveUsers {";
 
-		synchronized(u) {
+		synchronized (u) {
 			Iterator<String> i = u.iterator();
 			while (i.hasNext()) {
-				out = out+i.next();
+				out = out + i.next();
 
-				if (i.hasNext()) 
-					out = out+",";
+				if (i.hasNext())
+					out = out + ",";
 			}
 		}
-		
+
 		out = out + "}\r\n";
 
-		
 		writeToClient(out);
 	}
-	
+
+	public void privateToUser(String input, String dest_uname) {
+		synchronized (clients) {
+			Connection dst = null;
+			for (Connection s : clients) {
+				if (s.uname.equals(dest_uname)) {
+					dst = s;
+					break;
+				}
+			}
+
+			if (dst != null) {
+				dst.writeToClient("Private " + uname + "\r\n" + input + "\u0004");
+			} else {
+				// TODO Return UserNotFound
+				System.out.println("User not found... '" + dest_uname + "'");
+			}
+		}
+	}
+
 	public void publicToAllClients(String input, String sender_uname) {
-		for (Connection r : clients) {
-			if (r.active)
-				r.writePublicMessage(input, sender_uname);
+		synchronized (clients) {
+			Iterator<Connection> i = clients.iterator();
+			while (i.hasNext()) {
+				Connection r = i.next();
+				if (r.active)
+					r.writePublicMessage(input, sender_uname);
+			}
 		}
 	}
 
 	public void writePublicMessage(String msg, String sender_uname) {
-		writeToClient("Public " + sender_uname + "\r\n" + msg);
+		writeToClient("Public " + sender_uname + "\r\n" + msg + "\u0004");
 	}
 
 	public void writeToClient(String msg) {
