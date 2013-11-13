@@ -74,16 +74,16 @@ public class Connection implements Runnable {
 						// TODO: Some logic here for user already exists.
 
 						uname = cc.arg;
-
 						users.add(uname);
-
 						active = true;
+						
+						writeWelcome();
 					}
 				}
 
 				if (cc.command.equals("public")) {
 					System.out.println("public msg: " + cc.data);
-					publicToAllClients(cc.data);
+					publicToAllClients(cc.data, uname);
 				}
 				
 				if (cc.command.equals("private")) {
@@ -110,6 +110,10 @@ public class Connection implements Runnable {
 		}
 	}
 
+	public void writeWelcome() {
+		writeToClient("welcome\r\n");
+	}
+	
 	public void writeUserList(List<String> u) {
 		String out = "ActiveUsers {";
 
@@ -121,27 +125,27 @@ public class Connection implements Runnable {
 				if (i.hasNext()) 
 					out = out+",";
 			}
-			
 		}
 		
-		out = out + "}";
+		out = out + "}\r\n";
 
 		
 		writeToClient(out);
 	}
 	
-	public void publicToAllClients(String input) {
+	public void publicToAllClients(String input, String sender_uname) {
 		for (Connection r : clients) {
-			r.writePublicMessage(input);
+			if (r.active)
+				r.writePublicMessage(input, sender_uname);
 		}
 	}
 
-	public void writePublicMessage(String msg) {
-		writeToClient("Public " + uname + "\r\n" + msg);
+	public void writePublicMessage(String msg, String sender_uname) {
+		writeToClient("Public " + sender_uname + "\r\n" + msg);
 	}
 
 	public void writeToClient(String msg) {
-		msg = "]" + msg + "\u0004";
+		msg = "]" + msg;
 		try {
 			toClient.write(msg.getBytes());
 			toClient.flush();
