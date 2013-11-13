@@ -15,7 +15,7 @@ public class ClientCommand {
 		String before = input.substring(0, s);
 		if (s < input.length()) {
 			out.data = input.substring(s+4);
-			System.out.println("Here is my data: " + out.data);
+			//System.out.println("Here is my data: " + out.data);
 		}
 		
 		String[] args = before.split(" ");
@@ -25,8 +25,8 @@ public class ClientCommand {
 			out.arg = args[1];
 		}
 		
-		System.out.println(out.command);
-		System.out.println(out.data);
+		//System.out.println(out.command);
+		//System.out.println(out.data);
 		
 		return out;
 	}

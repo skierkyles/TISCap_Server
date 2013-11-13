@@ -14,11 +14,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.net.Socket;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 public class Connection implements Runnable {
 	public Socket client;
 	public Set<Connection> clients;
+	public List<String> users;
 	public OutputStream toClient;
 	public InputStream fromClient;
 	public static final int BUFFER_SIZE = 2048;
@@ -27,9 +30,10 @@ public class Connection implements Runnable {
 	public String uname = "";
 	public boolean active = false;
 
-	public Connection(Socket client, Set<Connection> clients) {
+	public Connection(Socket client, Set<Connection> clients, List<String> users) {
 		this.clients = clients;
 		this.client = client;
+		this.users = users;
 	}
 
 	/**
@@ -58,15 +62,21 @@ public class Connection implements Runnable {
 						host));
 				String input = bufReader.readLine();
 				ClientCommand cc = ClientCommand.parse(input);
+				
+				System.out.println("Requested Command: " + cc.command);
 
-				//Log the user in.
+				// Log the user in.
 				while (active == false) {
-					System.out.println(cc.command);
-					
+
 					if (!cc.command.equals("login")) {
 						return;
 					} else {
+						// TODO: Some logic here for user already exists.
+
 						uname = cc.arg;
+
+						users.add(uname);
+
 						active = true;
 					}
 				}
@@ -75,6 +85,15 @@ public class Connection implements Runnable {
 					System.out.println("public msg: " + cc.data);
 					publicToAllClients(cc.data);
 				}
+				
+				if (cc.command.equals("private")) {
+
+				}
+
+				if (cc.command.equals("users")) {
+					writeUserList(users);
+				}
+
 				// Somewhere in here we need a break;
 			}
 		} catch (IOException ioe) {
@@ -90,19 +109,39 @@ public class Connection implements Runnable {
 			}
 		}
 	}
+
+	public void writeUserList(List<String> u) {
+		String out = "ActiveUsers {";
+
+		synchronized(u) {
+			Iterator<String> i = u.iterator();
+			while (i.hasNext()) {
+				out = out+i.next();
+
+				if (i.hasNext()) 
+					out = out+",";
+			}
+			
+		}
+		
+		out = out + "}";
+
+		
+		writeToClient(out);
+	}
 	
 	public void publicToAllClients(String input) {
 		for (Connection r : clients) {
 			r.writePublicMessage(input);
 		}
 	}
-	
+
 	public void writePublicMessage(String msg) {
 		writeToClient("Public " + uname + "\r\n" + msg);
 	}
 
 	public void writeToClient(String msg) {
-		msg = "]" + msg;
+		msg = "]" + msg + "\u0004";
 		try {
 			toClient.write(msg.getBytes());
 			toClient.flush();
