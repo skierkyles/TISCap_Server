@@ -82,13 +82,14 @@ public class Connection implements Runnable {
 							users.add(uname);
 							active = true;
 
-							writeToClient("welcome\r\n");
+							writeToClient("Welcome\r\n");
+							writeToAllClients("Connected " + uname + "\r\n");
 						}
 					}
 				}
 
 				if (cc.command.equals("public")) {
-					System.out.println("public msg: " + cc.data);
+					System.out.println("public msg:" + cc.data);
 					publicToAllClients(cc.data, uname);
 				}
 
@@ -98,6 +99,13 @@ public class Connection implements Runnable {
 
 				if (cc.command.equals("users")) {
 					writeUserList(users);
+				}
+				
+				if (cc.command.equals("close")) {
+					writeToAllClients("Disconnected " + uname + "\r\n");
+					client.close();
+					users.remove(uname);
+					clients.remove(this);
 				}
 
 				// Somewhere in here we need a break;
@@ -114,10 +122,6 @@ public class Connection implements Runnable {
 			} catch (Exception e) {
 			}
 		}
-	}
-
-	public void writeWelcome() {
-		writeToClient("welcome\r\n");
 	}
 
 	public void writeUserList(List<String> u) {
@@ -153,6 +157,17 @@ public class Connection implements Runnable {
 			} else {
 				// TODO Return UserNotFound
 				System.out.println("User not found... '" + dest_uname + "'");
+			}
+		}
+	}
+	
+	public void writeToAllClients(String input) {
+		synchronized (clients) {
+			Iterator<Connection> i = clients.iterator();
+			while (i.hasNext()) {
+				Connection r = i.next();
+				if (r.active)
+					r.writeToClient(input);
 			}
 		}
 	}
