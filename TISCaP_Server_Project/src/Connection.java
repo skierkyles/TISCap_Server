@@ -72,13 +72,18 @@ public class Connection implements Runnable {
 					if (!cc.command.equals("login")) {
 						return;
 					} else {
-						// TODO: Some logic here for user already exists.
+						if (users.contains(cc.arg))	{
+							writeToClient("UsernameTaken\r\n");
+							
+							//Close the connection.
+							client.close();
+						} else {
+							uname = cc.arg;
+							users.add(uname);
+							active = true;
 
-						uname = cc.arg;
-						users.add(uname);
-						active = true;
-
-						writeWelcome();
+							writeToClient("welcome\r\n");
+						}
 					}
 				}
 
