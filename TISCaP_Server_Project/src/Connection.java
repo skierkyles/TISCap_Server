@@ -3,7 +3,7 @@
  * 
  * A runnable connection object to help with spawning of additional threads. 
  * 
- * @author Kyle Swanson
+ * @author Kyle Swanson & Nicole Thomas
  */
 
 import java.io.BufferedInputStream;
@@ -59,8 +59,7 @@ public class Connection implements Runnable {
 			while ((numBytes = fromClient.read(buffer)) != -1) {
 				// What the client sent us.
 				host = new String(buffer, 0, numBytes);
-				BufferedReader bufReader = new BufferedReader(new StringReader(
-						host));
+				BufferedReader bufReader = new BufferedReader(new StringReader(host));
 				String input = bufReader.readLine();
 				ClientCommand cc = ClientCommand.parse(input);
 
@@ -69,7 +68,7 @@ public class Connection implements Runnable {
 				// Log the user in.
 				while (active == false) {
 
-					if (!cc.command.equals("login")) {
+					if (!cc.command.equals("login") || cc.arg.isEmpty()) {
 						return;
 					} else {
 						if (users.contains(cc.arg))	{

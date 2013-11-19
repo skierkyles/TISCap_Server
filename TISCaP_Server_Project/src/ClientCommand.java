@@ -19,7 +19,7 @@ public class ClientCommand {
 		}
 		
 		String[] args = before.split(" ");
-		out.command = args[0].substring(1);
+		out.command = args[0].substring(1).toLowerCase();
 		
 		if (args.length > 1) {
 			out.arg = args[1];
