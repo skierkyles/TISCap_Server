@@ -16,7 +16,6 @@ import java.io.StringReader;
 import java.net.Socket;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 public class Connection implements Runnable {
 	public Socket client;
@@ -30,8 +29,7 @@ public class Connection implements Runnable {
 	public String uname = "";
 	public boolean active = false;
 
-	public Connection(Socket client, List<Connection> clients,
-			List<String> users) {
+	public Connection(Socket client, List<Connection> clients, List<String> users) {
 		this.clients = clients;
 		this.client = client;
 		this.users = users;
@@ -65,16 +63,20 @@ public class Connection implements Runnable {
 
 				System.out.println("Requested Command: " + cc.command);
 
+				if (active == true && cc.command.equals("login")) {
+					writeError("You have already logged in.");
+				}
+				
 				// Log the user in.
 				while (active == false) {
-
-					if (!cc.command.equals("login") || cc.arg.isEmpty()) {
+					if (!cc.command.equals("login") || cc.arg.isEmpty() || cc.command.equals("")) {
+						writeBadSyntax("Login command: /login username CRLF");
 						return;
 					} else {
-						if (users.contains(cc.arg))	{
+						if (users.contains(cc.arg)) {
 							writeToClient("UsernameTaken\r\n");
-							
-							//Close the connection.
+
+							// Close the connection.
 							client.close();
 						} else {
 							uname = cc.arg;
@@ -86,6 +88,10 @@ public class Connection implements Runnable {
 						}
 					}
 				}
+				
+//				if (active == true && cc.command.equals("login")) {
+//					writeError("You have already logged in.");
+//				}
 
 				if (cc.command.equals("public")) {
 					System.out.println("public msg:" + cc.data);
@@ -99,15 +105,13 @@ public class Connection implements Runnable {
 				if (cc.command.equals("users")) {
 					writeUserList(users);
 				}
-				
+
 				if (cc.command.equals("close")) {
 					writeToAllClients("Disconnected " + uname + "\r\n");
 					client.close();
 					users.remove(uname);
 					clients.remove(this);
 				}
-
-				// Somewhere in here we need a break;
 			}
 		} catch (IOException ioe) {
 			System.err.println(ioe);
@@ -123,7 +127,7 @@ public class Connection implements Runnable {
 		}
 	}
 
-	public void writeUserList(List<String> u) {
+	private void writeUserList(List<String> u) {
 		String out = "ActiveUsers {";
 
 		synchronized (u) {
@@ -141,7 +145,7 @@ public class Connection implements Runnable {
 		writeToClient(out);
 	}
 
-	public void privateToUser(String input, String dest_uname) {
+	private void privateToUser(String input, String dest_uname) {
 		synchronized (clients) {
 			Connection dst = null;
 			for (Connection s : clients) {
@@ -159,8 +163,8 @@ public class Connection implements Runnable {
 			}
 		}
 	}
-	
-	public void writeToAllClients(String input) {
+
+	private void writeToAllClients(String input) {
 		synchronized (clients) {
 			Iterator<Connection> i = clients.iterator();
 			while (i.hasNext()) {
@@ -171,7 +175,7 @@ public class Connection implements Runnable {
 		}
 	}
 
-	public void publicToAllClients(String input, String sender_uname) {
+	private void publicToAllClients(String input, String sender_uname) {
 		synchronized (clients) {
 			Iterator<Connection> i = clients.iterator();
 			while (i.hasNext()) {
@@ -182,17 +186,27 @@ public class Connection implements Runnable {
 		}
 	}
 
-	public void writePublicMessage(String msg, String sender_uname) {
+	private void writePublicMessage(String msg, String sender_uname) {
 		writeToClient("Public " + sender_uname + "\r\n" + msg + "\u0004");
 	}
 
-	public void writeToClient(String msg) {
+	private void writeToClient(String msg) {
 		msg = "]" + msg;
 		try {
 			toClient.write(msg.getBytes());
 			toClient.flush();
 		} catch (IOException e) {
 		}
+	}
+
+	// errors
+
+	private void writeBadSyntax(String msg) {
+		writeToClient("BadSyntax " + msg + "\r\n");
+	}
+
+	private void writeError(String msg) {
+		writeToClient("Error " + msg + "\r\n");
 	}
 
 }

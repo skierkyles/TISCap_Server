@@ -18,17 +18,16 @@
  *	config.getServerName();
  */
 
-import java.io.*;
-
-import org.xml.sax.*;
-import org.xml.sax.helpers.DefaultHandler;
-
-import javax.xml.parsers.SAXParserFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-
-import java.util.Map;
+import java.io.File;
 import java.util.HashMap;
+import java.util.Map;
+
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 public class Configuration extends DefaultHandler {
 	private Map<String, String> map;
