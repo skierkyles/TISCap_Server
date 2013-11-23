@@ -66,16 +66,15 @@ public class Connection implements Runnable {
 				if (active == true && cc.command.equals("login")) {
 					writeError("You have already logged in.");
 				}
-				
+
 				// Log the user in.
 				while (active == false) {
 					if (!cc.command.equals("login") || cc.arg.isEmpty() || cc.command.equals("")) {
-						writeBadSyntax("Login command: /login username CRLF");
+						writeBadSyntax("Login command is '/login username CRLF'");
 						return;
 					} else {
 						if (users.contains(cc.arg)) {
 							writeToClient("UsernameTaken\r\n");
-
 							// Close the connection.
 							client.close();
 						} else {
@@ -88,10 +87,6 @@ public class Connection implements Runnable {
 						}
 					}
 				}
-				
-//				if (active == true && cc.command.equals("login")) {
-//					writeError("You have already logged in.");
-//				}
 
 				if (cc.command.equals("public")) {
 					System.out.println("public msg:" + cc.data);
@@ -103,14 +98,24 @@ public class Connection implements Runnable {
 				}
 
 				if (cc.command.equals("users")) {
-					writeUserList(users);
+					// check if extra args for bad syntax
+					if (cc.arg.equals("")) {
+						writeUserList(users);
+					} else {
+						writeBadSyntax("/users takes no arguments");
+					}
 				}
 
 				if (cc.command.equals("close")) {
-					writeToAllClients("Disconnected " + uname + "\r\n");
-					client.close();
-					users.remove(uname);
-					clients.remove(this);
+					// check if extra args for bad syntax
+					if (cc.arg.equals("")) {
+						writeToAllClients("Disconnected " + uname + "\r\n");
+						client.close();
+						users.remove(uname);
+						clients.remove(this);
+					} else {
+						writeBadSyntax("/close takes no arguments");
+					}
 				}
 			}
 		} catch (IOException ioe) {
