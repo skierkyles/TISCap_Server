@@ -104,12 +104,12 @@ public class Connection implements Runnable {
 					privateToUser(cc.data, cc.arg);
 				}
 
-				if (cc.command.equals("users")) {
+				if (cc.command.equals("activeusers")) {
 					// check if extra args for bad syntax
 					if (cc.arg.equals("")) {
 						writeUserList(users);
 					} else {
-						writeBadSyntax("/users takes no arguments");
+						writeBadSyntax("/activeusers takes no arguments");
 					}
 				}
 
