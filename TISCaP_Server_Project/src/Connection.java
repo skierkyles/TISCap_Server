@@ -57,8 +57,14 @@ public class Connection implements Runnable {
 			while ((numBytes = fromClient.read(buffer)) != -1) {
 				// What the client sent us.
 				host = new String(buffer, 0, numBytes);
-				BufferedReader bufReader = new BufferedReader(new StringReader(host));
-				String input = bufReader.readLine();
+				BufferedReader bufReader = new BufferedReader(new StringReader(host));				
+
+				// This gets the entire message including line breaks. 
+				char[] cin = new char[2048];
+				bufReader.read(cin);
+
+				String input = String.valueOf(cin);
+				
 				ClientCommand cc = ClientCommand.parse(input);
 
 				System.out.println("Requested Command: " + cc.command);
