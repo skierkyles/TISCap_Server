@@ -4,12 +4,18 @@ public class ClientCommand {
 	public String data = "";
 
 	public static ClientCommand parse(String input) {
+		boolean debug = false;
+		
+		if (debug) {
+			System.out.println("Raw Input: " + input);
+		}
+				
 		ClientCommand out = new ClientCommand();
 		if (input.length() == 0) {
 			out.command = "";
 		} else {
 
-			int s = input.indexOf("\\r\\n");
+			int s = input.indexOf("\r\n");
 			System.out.println("first s = "+s);
 
 			if (s == -1) {

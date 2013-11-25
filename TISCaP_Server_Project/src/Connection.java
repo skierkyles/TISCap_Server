@@ -64,6 +64,7 @@ public class Connection implements Runnable {
 				bufReader.read(cin);
 
 				String input = String.valueOf(cin);
+				input = input.trim();
 				
 				ClientCommand cc = ClientCommand.parse(input);
 
