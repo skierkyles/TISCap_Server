@@ -25,7 +25,7 @@ public class ClientCommand {
 
 			String before = input.substring(0, s);
 			if (s < input.length()) {
-				out.data = input.substring(s + 4);
+				out.data = input.substring(s + 2);
 			}
 
 			String[] args = before.split(" ");
