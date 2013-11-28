@@ -77,7 +77,7 @@ public class Connection implements Runnable {
 				// Log the user in.
 				while (active == false) {
 					if (!cc.command.equals("login") || cc.arg.isEmpty() || cc.command.equals("")) {
-						writeBadSyntax("Login command is '/login username CRLF'");
+						writeBadSyntax("Login command is '/login username \\r\\n'");
 						return;
 					} else {
 						if (users.contains(cc.arg)) {
@@ -94,27 +94,26 @@ public class Connection implements Runnable {
 						}
 					}
 				}
-
+				
+				// command and error handling
 				if (cc.command.equals("public")) {
 					System.out.println("public msg:" + cc.data);
 					publicToAllClients(cc.data, uname);
-				}
-
-				if (cc.command.equals("private")) {
-					privateToUser(cc.data, cc.arg);
-				}
-
-				if (cc.command.equals("users")) {
-					// check if extra args for bad syntax
+				} else if (cc.command.equals("private")) {
+					if (cc.arg.isEmpty()) {
+						writeError("Enter a username.");
+					} else {
+						privateToUser(cc.data, cc.arg);
+					}
+				} else if (cc.command.equals("users")) {
+					// check for extra args: bad syntax
 					if (cc.arg.equals("")) {
 						writeUserList(users);
 					} else {
 						writeBadSyntax("/activeusers takes no arguments");
 					}
-				}
-
-				if (cc.command.equals("close")) {
-					// check if extra args for bad syntax
+				} else if (cc.command.equals("close")) {
+					// check for extra args: bad syntax
 					if (cc.arg.equals("")) {
 						writeToAllClients("Disconnected " + uname + "\r\n");
 						client.close();
@@ -123,6 +122,12 @@ public class Connection implements Runnable {
 					} else {
 						writeBadSyntax("/close takes no arguments");
 					}
+				} else if (cc.command.equals("login")) { 	
+					// if the user logs in, but hasn't submitted a new command, do not throw an error
+					continue; 
+				} else {
+					// if the user enters else, it's not a supported command!
+					writeBadSyntax(""); 
 				}
 			}
 		} catch (IOException ioe) {
@@ -171,6 +176,7 @@ public class Connection implements Runnable {
 				dst.writeToClient("Private " + uname + "\r\n" + input + "\u0004");
 			} else {
 				// TODO Return UserNotFound
+				writeError("User not found");
 				System.out.println("User not found... '" + dest_uname + "'");
 			}
 		}

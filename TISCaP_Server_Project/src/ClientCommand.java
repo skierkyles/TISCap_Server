@@ -16,11 +16,9 @@ public class ClientCommand {
 		} else {
 
 			int s = input.indexOf("\r\n");
-			System.out.println("first s = "+s);
 
 			if (s == -1) {
 				s = input.length();
-				System.out.println("s = "+s);
 			}
 
 			String before = input.substring(0, s);
