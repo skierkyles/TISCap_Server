@@ -11,6 +11,7 @@ public class ClientCommand {
 		}
 				
 		ClientCommand out = new ClientCommand();
+		
 		if (input.length() == 0) {
 			out.command = "";
 		} else {

@@ -84,6 +84,8 @@ public class Connection implements Runnable {
 							writeToClient("UsernameTaken\r\n");
 							// Close the connection.
 							client.close();
+						} else if (cc.arg.length() > 16) {
+							writeError("Username must be between 1 and 16 characters");
 						} else {
 							uname = cc.arg;
 							users.add(uname);
@@ -103,6 +105,9 @@ public class Connection implements Runnable {
 					if (cc.arg.isEmpty()) {
 						writeError("Enter a username.");
 					} else {
+						// TODO: data not getting set...
+						System.out.println("data = " + cc.data);
+						System.out.println("arg = " + cc.arg);
 						privateToUser(cc.data, cc.arg);
 					}
 				} else if (cc.command.equals("users")) {
