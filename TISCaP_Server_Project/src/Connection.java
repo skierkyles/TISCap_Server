@@ -211,7 +211,7 @@ public class Connection implements Runnable {
 	private void writeToClient(String msg) {
 		msg = "]" + msg;
 		try {
-			toClient.write(msg.getBytes());
+			toClient.write(msg.getBytes("UTF-8"));
 			toClient.flush();
 		} catch (IOException e) {
 		}
