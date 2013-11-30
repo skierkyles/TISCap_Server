@@ -65,11 +65,13 @@ public class Connection implements Runnable {
 
 				String input = String.valueOf(cin);
 				input = input.trim();
-				
+
 				ClientCommand cc = ClientCommand.parse(input);
-
+				
+				System.out.println("parsed input = " + cc.command + " " + cc.arg + " " + cc.data);
+				
 				System.out.println("Requested Command: " + cc.command);
-
+				
 				if (active == true && cc.command.equals("login")) {
 					writeError("You have already logged in.");
 				}
@@ -102,12 +104,9 @@ public class Connection implements Runnable {
 					System.out.println("public msg:" + cc.data);
 					publicToAllClients(cc.data, uname);
 				} else if (cc.command.equals("private")) {
-					if (cc.arg.isEmpty()) {
+					if (cc.arg.equals("\\r\\n")) {
 						writeError("Enter a username.");
 					} else {
-						// TODO: data not getting set...
-						System.out.println("data = " + cc.data);
-						System.out.println("arg = " + cc.arg);
 						privateToUser(cc.data, cc.arg);
 					}
 				} else if (cc.command.equals("users")) {
@@ -115,7 +114,7 @@ public class Connection implements Runnable {
 					if (cc.arg.equals("")) {
 						writeUserList(users);
 					} else {
-						writeBadSyntax("/activeusers takes no arguments");
+						writeBadSyntax("/users takes no arguments");
 					}
 				} else if (cc.command.equals("close")) {
 					// check for extra args: bad syntax
@@ -178,11 +177,9 @@ public class Connection implements Runnable {
 			}
 
 			if (dst != null) {
-				dst.writeToClient("Private " + uname + "\r\n" + input + "\u0004");
+				dst.writeToClient("Private " + uname + "\r\n" + input + "\u0004\r\n");
 			} else {
-				// TODO Return UserNotFound
-				writeError("User not found");
-				System.out.println("User not found... '" + dest_uname + "'");
+				writeError("User '" + dest_uname + "' not found");
 			}
 		}
 	}
@@ -210,7 +207,7 @@ public class Connection implements Runnable {
 	}
 
 	private void writePublicMessage(String msg, String sender_uname) {
-		writeToClient("Public " + sender_uname + "\r\n" + msg + "\u0004");
+		writeToClient("Public " + sender_uname + "\r\n" + msg + "\u0004\r\n");
 	}
 
 	private void writeToClient(String msg) {
