@@ -19,16 +19,20 @@ import java.util.Iterator;
 import java.util.List;
 
 public class Connection implements Runnable {
-	public Socket client;
-	public List<Connection> clients;
-	public List<String> users;
-	public OutputStream toClient;
-	public InputStream fromClient;
-	public static final int BUFFER_SIZE = 2048;
+	
+	// static 
+	private static final int BUFFER_SIZE = 2048;
+	
+	// instance variables
+	private Socket client;
+	private List<Connection> clients;
+	private List<String> users;
+	private OutputStream toClient;
+	private InputStream fromClient;
 
 	// Some details about the current client.
-	public String uname = "";
-	public boolean active = false;
+	private String uname = "";
+	private boolean active = false;
 
 	public Connection(Socket client, List<Connection> clients, List<String> users) {
 		this.clients = clients;
@@ -37,10 +41,11 @@ public class Connection implements Runnable {
 	}
 
 	/**
-	 * This method runs in a separate thread.
+	 * This method runs each user in a separate thread.
+	 * 
+	 * The only global method from this class.
 	 */
 	public void run() {
-		// LOGIC UP IN HERE!
 		byte[] buffer = new byte[BUFFER_SIZE];
 		fromClient = null;
 		toClient = null;
@@ -69,6 +74,7 @@ public class Connection implements Runnable {
 
 				ClientCommand cc = ClientCommand.parse(input);
 
+				// check if user has already logged in
 				if (active == true && cc.command.equals("login")) {
 					writeError("You have already logged in.");
 				}
@@ -154,15 +160,17 @@ public class Connection implements Runnable {
 					fromClient.close();
 				if (toClient != null)
 					toClient.close();
-			} catch (Exception e) {
-			}
+			} catch (Exception e) {}
 		}
 	}
+	
+	/**
+	 * Helper methods!
+	 */
 
 	// writes the user list to client
 	private void writeUserList(List<String> u) {
 		String out = "ActiveUsers {";
-
 		synchronized (u) {
 			Iterator<String> i = u.iterator();
 			while (i.hasNext()) {
@@ -172,9 +180,7 @@ public class Connection implements Runnable {
 					out = out + ",";
 			}
 		}
-
 		out = out + "}\r\n";
-
 		writeToClient(out);
 	}
 
@@ -189,8 +195,7 @@ public class Connection implements Runnable {
 				}
 			}
 			if (dst != null && dest_uname.equals(uname)) {
-				// user is sending private message to self: allowed, but maybe
-				// silly
+				// user is sending private message to self: allowed, but silly
 				String funny = "Why are you writing messages to yourself?\r\n";
 				dst.writeToClient("Private " + uname + "\r\n" + funny + input + "\u0004\r\n");
 			} else if (dst != null) {
@@ -242,7 +247,10 @@ public class Connection implements Runnable {
 		}
 	}
 
-	// errors
+	/**
+	 * Error message methods!
+	 * @param msg
+	 */
 
 	// bad syntax: takes an input message if desired
 	private void writeBadSyntax(String msg) {

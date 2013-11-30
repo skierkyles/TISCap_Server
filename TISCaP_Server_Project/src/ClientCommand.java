@@ -24,12 +24,17 @@ public class ClientCommand {
 			out.command = "";
 		} else {
 			
+			// split up the input so we can work with it
 			String[] args = input.split(" ");
 
+			// first word should be command
 			out.command = args[0].substring(1).toLowerCase();
 
+			// handle commands with arguments or data
 			if (args.length > 1) {
+				
 				out.arg = args[1];
+				
 				// public message
 				if (out.command.equals("public") && args[1].equals("\\r\\n")) {
 					// form the client message from remaining arguments
@@ -39,6 +44,7 @@ public class ClientCommand {
 					// remove any trailing spaces
 					out.data = out.data.trim();
 				}
+				
 				// private message
 				if (out.command.equals("private") && args.length > 2) {
 					// pre-error checking
