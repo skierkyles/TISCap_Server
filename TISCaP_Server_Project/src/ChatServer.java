@@ -1,9 +1,9 @@
 /**
  * Original author - Greg Gagne.
  * 
- * Test of things...
+ * Server to run multiple chat clients
  * 
- * @author Kyle Swanson
+ * @authors Kyle Swanson, Nicole Thomas
  */
 
 import java.io.IOException;
@@ -17,7 +17,6 @@ import java.util.concurrent.Executors;
 public class  ChatServer
 {
 	public static final int DEFAULT_PORT = 4020;
-	// public static final String CONFIG = "/home/kyle/config.xml";
 	
     // construct a thread pool for concurrency	
 	private static final Executor exec = Executors.newCachedThreadPool();
@@ -28,17 +27,12 @@ public class  ChatServer
 		
 		ServerSocket sock = null;
 		
-		//System.out.println(cache.keySet().toString());
-		
 		try {
 			// establish the socket
 			sock = new ServerSocket(DEFAULT_PORT);
 
 			while (true) {
-				/**
-				 * now listen for connections
-				 * and service the connection in a separate thread.
-				 */
+				// now listen for connections and service the connection in a separate thread.
 				Connection c = new Connection(sock.accept(), threads, users);
 				Runnable task = c;
 				threads.add(c);
