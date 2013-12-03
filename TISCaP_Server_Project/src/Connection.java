@@ -93,6 +93,7 @@ public class Connection implements Runnable {
 							client.close();
 						} else if (cc.arg.length() > 16) {
 							writeError("Username must be between 1 and 16 characters");
+							client.close();
 						} else {
 							uname = cc.arg;
 							users.add(uname);
@@ -106,15 +107,11 @@ public class Connection implements Runnable {
 
 				// command and error handling
 				if (cc.command.equals("public")) {
-					System.out.println("public msg:" + cc.data);
 					publicToAllClients(cc.data, uname);
 				} else if (cc.command.equals("private")) {
 					if (cc.arg.isEmpty()) {
 						writeError("Enter a username.");
 					} else {
-						// TODO: data not getting set...
-						System.out.println("data = " + cc.data);
-						System.out.println("arg = " + cc.arg);
 						privateToUser(cc.data, cc.arg);
 					}
 				} else if (cc.command.equals("users")) {
@@ -158,7 +155,7 @@ public class Connection implements Runnable {
 	}
 
 	private void writeUserList(List<String> u) {
-		String out = "ActiveUsers {";
+		String out = "ActiveUsers ";
 
 		synchronized (u) {
 			Iterator<String> i = u.iterator();
@@ -170,7 +167,7 @@ public class Connection implements Runnable {
 			}
 		}
 
-		out = out + "}\r\n";
+		out = out + "\r\n";
 
 		writeToClient(out);
 	}
@@ -186,7 +183,7 @@ public class Connection implements Runnable {
 			}
 
 			if (dst != null) {
-				dst.writeToClient("Private " + uname + "\r\n" + input + "\u0004");
+				dst.writeToClient("Private " + uname + "\r\n" + input);
 			} else {
 				// TODO Return UserNotFound
 				writeError("User not found");
@@ -218,7 +215,7 @@ public class Connection implements Runnable {
 	}
 
 	private void writePublicMessage(String msg, String sender_uname) {
-		writeToClient("Public " + sender_uname + "\r\n" + msg + "\u0004");
+		writeToClient("Public " + sender_uname + "\r\n" + msg);
 	}
 
 	private void writeToClient(String msg) {

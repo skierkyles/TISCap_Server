@@ -25,23 +25,35 @@ public class ClientCommand {
 			out.command = "";
 		} else {
 
-			int s = input.indexOf("\\r\\n");
-			System.out.println("before " + s);
-			if (s == -1) {
-				s = input.length();
+			// int s = input.indexOf("\\r\\n");
+			//
+			// if (s == -1) {
+			// s = input.length();
+			// }
+			//
+			// String before = input.substring(0, s);
+			// if (s < input.length()) {
+			// out.data = input.substring(s + 4);
+			// System.out.println("data = " + out.data);
+			// }
+			//
+			// String[] args = before.split(" ");
+			// out.command = args[0].substring(1).toLowerCase();
+			//
+			// if (args.length > 1) {
+			// out.arg = args[1];
+			// System.out.println("arg = " + out.arg);
+			// }
+			input = input.substring(1);
+			String[] msg = input.split("\\r\\n", 2);
+			String[] c_a = msg[0].split(" ");
+			if (c_a.length == 2) {
+				out.arg = c_a[1];
 			}
-			System.out.println("after " + s);
-			String before = input.substring(0, s);
-			if (s < input.length()) {
-				out.data = input.substring(s + 4);
-				System.out.println(out.data);
-			}
-
-			String[] args = before.split(" ");
-			out.command = args[0].substring(1).toLowerCase();
-
-			if (args.length > 1) {
-				out.arg = args[1];
+			out.command = c_a[0].toLowerCase();
+			System.out.println("out command = '" + out.command + "'");
+			if (msg.length == 2) {
+				out.data = msg[1];
 			}
 		}
 
