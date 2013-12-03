@@ -1,9 +1,7 @@
 /**
- * Original author - Greg Gagne.
- * 
  * Server to run multiple chat clients
  * 
- * @authors Kyle Swanson, Nicole Thomas
+ * @author Kyle Swanson, Nicole Thomas
  */
 
 import java.io.IOException;
@@ -14,8 +12,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-public class  ChatServer
-{
+public class  ChatServer {
 	public static final int DEFAULT_PORT = 4020;
 	
     // construct a thread pool for concurrency	
@@ -39,7 +36,7 @@ public class  ChatServer
 				exec.execute(task);
 			}
 		}
-		catch (IOException ioe) { }
+		catch (IOException ioe) {}
 		finally {
 			if (sock != null)
 				sock.close();
